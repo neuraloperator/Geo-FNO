@@ -139,7 +139,13 @@ class SpectralConv2d(nn.Module):
         basis = torch.exp(1j * 2 * np.pi * K).to(device)
 
         # coeff (batch, channels, m1, m2)
-        u_ft2 = u_ft[..., 1:].flip(-1, -2).conj()
+        kx_neg_idx = torch.cat(
+            [
+                torch.zeros(1, dtype=torch.long, device=device),
+                torch.arange(m1 - 1, 0, -1, dtype=torch.long, device=device),
+            ]
+        )
+        u_ft2 = u_ft.index_select(-2, kx_neg_idx)[..., 1:].flip(-1).conj()
         u_ft = torch.cat([u_ft, u_ft2], dim=-1)
 
         # Y (batch, channels, N)
